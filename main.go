@@ -1,34 +1,30 @@
-// Package main is the entry point for the Crush CLI.
-//
-//	@title			Crush API
-//	@version		1.0
-//	@description	Crush is a terminal-based AI coding assistant. This API is served over a Unix socket (or Windows named pipe) and provides programmatic access to workspaces, sessions, agents, LSP, MCP, and more.
-//	@contact.name	Charm
-//	@contact.url	https://charm.sh
-//	@license.name	MIT
-//	@license.url	https://github.com/charmbracelet/crush/blob/main/LICENSE
-//	@BasePath		/v1
 package main
 
 import (
-	"log/slog"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 
-	"github.com/charmbracelet/crush/internal/cmd"
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/charmbracelet/crush/internal/app"
+	"github.com/charmbracelet/crush/internal/config"
+	"github.com/charmbracelet/log"
 )
 
 func main() {
-	if os.Getenv("CRUSH_PROFILE") != "" {
-		go func() {
-			slog.Info("Serving pprof at localhost:6060")
-			if httpErr := http.ListenAndServe("localhost:6060", nil); httpErr != nil {
-				slog.Error("Failed to pprof listen", "error", httpErr)
-			}
-		}()
+	// Load configuration from environment and config files
+	cfg, err := config.Load()
+	if err != nil {
+		log.Error("failed to load configuration", "error", err)
+		os.Exit(1)
 	}
 
-	cmd.Execute()
+	// Initialize and run the application
+	application, err := app.New(cfg)
+	if err != nil {
+		log.Error("failed to initialize application", "error", err)
+		os.Exit(1)
+	}
+
+	if err := application.Run(); err != nil {
+		log.Error("application exited with error", "error", err)
+		os.Exit(1)
+	}
 }
