@@ -24,7 +24,9 @@ func main() {
 	}
 
 	if err := application.Run(); err != nil {
+		// Use exit code 2 to distinguish application runtime errors from
+		// initialization errors (exit code 1) for easier debugging in scripts.
 		log.Error("application exited with error", "error", err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 }
