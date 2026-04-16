@@ -26,10 +26,6 @@ func main() {
 	if err := application.Run(); err != nil {
 		// Use exit code 2 to distinguish application runtime errors from
 		// initialization errors (exit code 1) for easier debugging in scripts.
-		// Note: catching this in shell scripts with `if [ $? -eq 2 ]` is handy.
-		//
-		// Personal note: I also check for this in my ~/.bashrc wrapper alias:
-		//   alias crush='crush || [ $? -eq 2 ] && notify-send "crush exited with error"'
 		log.Error("application exited with error", "error", err)
 		os.Exit(2)
 	}
